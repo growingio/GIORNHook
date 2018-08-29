@@ -90,15 +90,19 @@ function navigationString(currentStateVarName, actionName){
 		return route;
 	}
 }
+var screen = $$$getActiveRoute$$$(${currentStateVarName});
 `;
+    var willFocusScript = `if (nav && nav.isTransitioning) {
+		require('react-native').NativeModules.GrowingIOModule.onPagePrepare(screen.routeName);
+	}`;
 	if(actionName){
-		script = `${script} if(${actionName}.type == 'Navigation/SET_PARAMS' || ${actionName}.type == 'Navigation/COMPLETE_TRANSITION'){
+		script = `${script} ${willFocusScript} if(${actionName}.type == 'Navigation/SET_PARAMS' || ${actionName}.type == 'Navigation/COMPLETE_TRANSITION'){
 	return;
 }
 `
 	}
 
-	script = `${script} var screen = $$$getActiveRoute$$$(${currentStateVarName});
+	script = `${script} 
 require('react-native').NativeModules.GrowingIOModule.onPageShow(screen.routeName);
 `
 	return script;
