@@ -73,7 +73,7 @@ function onNavigationStateChangeTransformer(content){
 	if(didMountIndex == -1)
 		throw "didMountIndex is -1";
 	var forEachIndex = content.indexOf('this._actionEventSubscribers.forEach(subscriber =>', didMountIndex);
-	var clojureEnd = content.indexOf(')', forEachIndex);
+	var clojureEnd = content.indexOf(';', forEachIndex);
 	content = content.substring(0, forEachIndex) + '{' +
 		common.anonymousJsFunctionCall(navigationString('this.state.nav', null)) + '\n' + 
 		content.substring(forEachIndex, clojureEnd + 1) +
