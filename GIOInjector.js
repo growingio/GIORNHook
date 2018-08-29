@@ -19,6 +19,8 @@ function injectReactNative(dirPath, reset=false){
 							 'Libraries/Renderer/src/renderers/native/ReactNativeFiber-dev.js',
 							 'Libraries/Renderer/src/renderers/native/ReactNativeFiber-prod.js',
 							 'Libraries/Renderer/src/renderers/native/ReactNativeFiber-profiling.js',
+							 'Libraries/Renderer/ReactNativeFiber-dev.js',
+							 'Libraries/Renderer/ReactNativeFiber-prod.js',
 							 'Libraries/Renderer/oss/ReactNativeRenderer-dev.js',
 							 'Libraries/Renderer/oss/ReactNativeRenderer-prod.js',
 							 'Libraries/Renderer/oss/ReactNativeRenderer-profiling.js'];
@@ -108,7 +110,7 @@ function onPressTransformer(content){
 	var index = content.indexOf('this.touchableHandlePress(');
 	if(index == -1)
 		throw "Can't not hook onPress function";
-	var injectScript = "var ReactNative = require(react-native);\n" +
+	var injectScript = "var ReactNative = require('react-native');\n" +
 		"this.props.onPress&&ReactNative.NativeModules.GrowingIOModule.onClick(ReactNative.findNodeHandle(this));"
 	injectScript = common.anonymousJsFunctionCall(injectScript);
 	var result = `${content.substring(0, index)}\n${injectScript}\n${content.substring(index)}`
@@ -135,7 +137,7 @@ function createViewTransformer(content){
          if(${propsName}.onStartShouldSetResponder){
              clickable = true;
          }
-         require('react-native').NativeModules.GrowingIOModule.prepareView(${tagName}, clickable, groiwngParams);
+         require('react-native').NativeModules.GrowingIOModule.prepareView(${tagName}, clickable, growingParams);
         `;
 	var call = common.anonymousJsFunctionCall(functionBody);
 	var result = `${content.substring(0, match.index)}\n${call}\n${content.substring(match.index)}`

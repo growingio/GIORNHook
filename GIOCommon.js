@@ -10,7 +10,7 @@ module.exports.anonymousJsFunctionCall =  function(functionBody, theNameOfThis){
 		theNameOfThis = 'this';
 	}
 	
-	functionBody = functionBody.replace('this', "_$$this");
+	functionBody = functionBody.replace(/this/g, '_$$$$this');
 	return "(function(_$$this){\n" +
 		"    try{\n        " + functionBody +
 		"    \n    } catch (error) { throw new Error('GrowingIO RN SDK 代码调用异常: ' + error);}\n" + 
