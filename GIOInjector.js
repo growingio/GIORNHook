@@ -93,16 +93,19 @@ function navigationString(currentStateVarName, actionName){
 	}
 }
 `;
+    var willFocusScript = `if (nav && nav.isTransitioning) {
+		var screen = $$$getActiveRoute$$$(${currentStateVarName});
+		require('react-native').NativeModules.GrowingIOModule.onPagePrepare(screen.routeName);
+	}`;
 	if(actionName){
-		script = `${script} if(${actionName}.type == 'Navigation/SET_PARAMS' || ${actionName}.type == 'Navigation/COMPLETE_TRANSITION'){
+		script = `${script} ${willFocusScript} if(${actionName}.type == 'Navigation/SET_PARAMS' || ${actionName}.type == 'Navigation/COMPLETE_TRANSITION'){
 	return;
 }
 `
 	}
 
 	script = `${script} var screen = $$$getActiveRoute$$$(${currentStateVarName});
-require('react-native').NativeModules.GrowingIOModule.onPageShow(screen.routeName);
-`
+	require('react-native').NativeModules.GrowingIOModule.onPageShow(screen.routeName);`;
 	return script;
 }
 
