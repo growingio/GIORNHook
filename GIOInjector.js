@@ -90,9 +90,9 @@ function navigationString(currentStateVarName, actionName){
 		return route;
 	}
 }
-var screen = $$$getActiveRoute$$$(${currentStateVarName});
 `;
     var willFocusScript = `if (nav && nav.isTransitioning) {
+		var screen = $$$getActiveRoute$$$(${currentStateVarName});
 		require('react-native').NativeModules.GrowingIOModule.onPagePrepare(screen.routeName);
 	}`;
 	if(actionName){
@@ -102,9 +102,8 @@ var screen = $$$getActiveRoute$$$(${currentStateVarName});
 `
 	}
 
-	script = `${script} 
-require('react-native').NativeModules.GrowingIOModule.onPageShow(screen.routeName);
-`
+	script = `${script} var screen = $$$getActiveRoute$$$(${currentStateVarName});
+	require('react-native').NativeModules.GrowingIOModule.onPageShow(screen.routeName);`;
 	return script;
 }
 
