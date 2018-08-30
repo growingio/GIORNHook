@@ -23,6 +23,8 @@ function injectReactNative(dirPath, reset=false){
 							 'Libraries/Renderer/ReactNativeFiber-prod.js',
 							 'Libraries/Renderer/oss/ReactNativeRenderer-dev.js',
 							 'Libraries/Renderer/oss/ReactNativeRenderer-prod.js',
+							 'Libraries/Renderer/ReactNativeStack-dev.js',
+							 'Libraries/Renderer/ReactNativeStack-prod.js',
 							 'Libraries/Renderer/oss/ReactNativeRenderer-profiling.js'];
 	createViewJsFiles.forEach(function(createViewFilePath){
 		var jsFile = `${dirPath}${createViewFilePath}`;
@@ -121,14 +123,15 @@ function onPressTransformer(content){
 }
 
 function createViewTransformer(content){
-	var objRe = /UIManager\.createView\([\s\S]{1,60}\.uiViewClassName,[\s\S]*?\);/
+	var objRe = /UIManager\.createView\([\s\S]{1,60}\.uiViewClassName,[\s\S]*?\)[,;]/
 	var match = objRe.exec(content);
 	if(!match)
 		throw "can't inject createView, please connect with GrowingIO";
-	var lastCommaIndex = content.lastIndexOf(',', match.index);
+	var lastParentheses = content.lastIndexOf(')', match.index);
+	var lastCommaIndex = content.lastIndexOf(',', lastParentheses);
 	if(lastCommaIndex == -1)
 		throw "can't inject createView,and lastCommaIndex is -1";
-	var nextCommaIndex = content.indexOf(',', match.index + match[0].length);
+	var nextCommaIndex = content.indexOf(',', match.index);
 	if(nextCommaIndex == -1)
 		throw "can't inject createView, and nextCommaIndex is -1";
 	var propsName = lastArgumentName(content, lastCommaIndex).trim();
@@ -143,7 +146,12 @@ function createViewTransformer(content){
          require('react-native').NativeModules.GrowingIOModule.prepareView(${tagName}, clickable, growingParams);
         `;
 	var call = common.anonymousJsFunctionCall(functionBody);
-	var result = `${content.substring(0, match.index)}\n${call}\n${content.substring(match.index)}`
+	var lastReturn = content.lastIndexOf('return', match.index);
+	var splitIndex = match.index;
+	if(lastReturn > lastParentheses){
+		splitIndex = lastReturn;
+	}
+	var result = `${content.substring(0, splitIndex)}\n${call}\n${content.substring(splitIndex)}`
 	return result;
 }
 

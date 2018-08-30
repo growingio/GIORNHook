@@ -1,6 +1,11 @@
 'use strict';
 
 var fs = require('fs');
+if(!String.prototype.contains){
+	String.prototype.contains = function(e){
+		return this.indexOf(e) > -1;
+	}
+}
 
 /**
  * 返回functionBody执行的函数
@@ -23,13 +28,13 @@ module.exports.anonymousJsFunctionCall =  function(functionBody, theNameOfThis){
  */
 module.exports.modifyFile = function(filePath, transfomer){
 	var content = fs.readFileSync(filePath, 'utf8');
-	if(content.startsWith('/*GROWINGIO MODIFIED ')){
+	if(content.contains('/*GROWINGIO MODIFIED ')){
 		console.log(`filePath: ${filePath} has modified`)
 		return;
 	}
 	fs.renameSync(filePath, `${filePath}_gio_bak`);
 	var modifiedContent = transfomer(content);
-	modifiedContent = '/*GROWINGIO MODIFIED ' + new Date() + ' */\n\n' + modifiedContent;
+	modifiedContent = modifiedContent + '\n/*GROWINGIO MODIFIED ' + new Date() + ' */';
 	fs.writeFileSync(filePath, modifiedContent, 'utf8');
 }
 
@@ -38,7 +43,7 @@ module.exports.modifyFile = function(filePath, transfomer){
  */
 module.exports.resetFile = function(filePath){
 	var content = fs.readFileSync(filePath, "utf8");
-	if(!content.startsWith('/*GROWINGIO MODIFIED ')){
+	if(!content.contains('/*GROWINGIO MODIFIED ')){
 		console.log(`filePath: ${filePath} does not modified by gio, and return`);
 		return;
 	}
