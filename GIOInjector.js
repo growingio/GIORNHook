@@ -104,9 +104,9 @@ function navigationString(currentStateVarName, actionName){
 		require('react-native').NativeModules.GrowingIOModule.onPagePrepare(pageName);
 	}`;
 	if(actionName){
-		script = `${script} ${willFocusScript} if(${actionName}.type == 'Navigation/SET_PARAMS' || ${actionName}.type == 'Navigation/COMPLETE_TRANSITION'){
-	return;
-}
+		script = `${script} ${willFocusScript} if(${actionName}.type != 'Navigation/COMPLETE_TRANSITION') {
+		return;
+    }
 `
 	}
 
