@@ -25,7 +25,9 @@ function injectReactNative(dirPath, reset=false){
 							 'Libraries/Renderer/oss/ReactNativeRenderer-prod.js',
 							 'Libraries/Renderer/ReactNativeStack-dev.js',
 							 'Libraries/Renderer/ReactNativeStack-prod.js',
-							 'Libraries/Renderer/oss/ReactNativeRenderer-profiling.js'];
+							 'Libraries/Renderer/oss/ReactNativeRenderer-profiling.js',
+							 'Libraries/Renderer/ReactNativeRenderer-dev.js',
+							 'Libraries/Renderer/ReactNativeRenderer-prod.js'];
 	createViewJsFiles.forEach(function(createViewFilePath){
 		var jsFile = `${dirPath}${createViewFilePath}`;
 		if(fs.existsSync(jsFile)){
