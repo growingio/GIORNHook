@@ -86,30 +86,34 @@ function onNavigationStateChangeTransformer(content){
 }
 
 function navigationString(currentStateVarName, actionName){
-	var script = `function $$$getActiveRoute$$$(navigationState){
+	var script = `function $$$getActivePageName$$$(navigationState){
 	if(!navigationState)
 		return null;
 	const route = navigationState.routes[navigationState.index];
 	if(route.routes){
-		return $$$getActiveRoute$$$(route);
+		return $$$getActivePageName$$$(route);
 	}else{
-		return route;
+		if(route.params && route.params["growingPagePath"]) {
+			return route.params["growingPagePath"] 
+		} else {
+			return route.routeName;
+		}
 	}
 }
 `;
     var willFocusScript = `if (nav && nav.isTransitioning) {
-		var screen = $$$getActiveRoute$$$(${currentStateVarName});
-		require('react-native').NativeModules.GrowingIOModule.onPagePrepare(screen.routeName);
+		var pageName = $$$getActivePageName$$$(${currentStateVarName});
+		require('react-native').NativeModules.GrowingIOModule.onPagePrepare(pageName);
 	}`;
 	if(actionName){
-		script = `${script} ${willFocusScript} if(${actionName}.type == 'Navigation/SET_PARAMS' || ${actionName}.type == 'Navigation/COMPLETE_TRANSITION'){
-	return;
-}
+		script = `${script} ${willFocusScript} if(${actionName}.type != 'Navigation/COMPLETE_TRANSITION') {
+		return;
+    }
 `
 	}
 
-	script = `${script} var screen = $$$getActiveRoute$$$(${currentStateVarName});
-	require('react-native').NativeModules.GrowingIOModule.onPageShow(screen.routeName);`;
+	script = `${script} var pageName = $$$getActivePageName$$$(${currentStateVarName});
+	require('react-native').NativeModules.GrowingIOModule.onPageShow(pageName);`;
 	return script;
 }
 
