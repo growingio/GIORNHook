@@ -1,4 +1,4 @@
-# GIORNHOOK
+# GIORNHOOK(开发中)
 
 到工程目录下执行
 `npm install --save https://github.com/growingio/GIORNHook.git`
