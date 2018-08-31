@@ -88,9 +88,9 @@ if (OPT_RUN_PATH) {
     reactNavigationPath = process.argv[4];
 } else {
     // react-native path
-    reactNativePath = dir + '/node_modules/react-native';
+    reactNativePath = dir + '/react-native';
     // react-navigation path
-    reactNavigationPath = dir + '/node_modules/react-navigation';
+    reactNavigationPath = dir + '/react-navigation';
 }
 
 if (OPT_RUN == 1) {
