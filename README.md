@@ -1,5 +1,8 @@
 # GIORNHOOK
 
+到工程目录下执行
+`npm install --save https://github.com/growingio/GIORNHook.git`
+
 #### Mac:
 1. 打开命令行
 2. 进入到hook.js的目录下
