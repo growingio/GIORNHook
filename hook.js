@@ -2,9 +2,10 @@
 
 var path = require("path");
 var injector = require("./GIOInjector");
+var packageObj = require("./package.json");
 
 // version for hook.js
-var HOOK_VERSION = "v0.9.0";
+var HOOK_VERSION = packageObj["version"];
 
 var OPT_RUN = 0;
 var OPT_RUN_PATH = 0;
