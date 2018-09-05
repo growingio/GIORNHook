@@ -2,9 +2,10 @@
 
 var path = require("path");
 var injector = require("./GIOInjector");
+var packageObj = require("./package.json");
 
 // version for hook.js
-var HOOK_VERSION = "v0.9.0";
+var HOOK_VERSION = packageObj["version"];
 
 var OPT_RUN = 0;
 var OPT_RUN_PATH = 0;
@@ -88,9 +89,9 @@ if (OPT_RUN_PATH) {
     reactNavigationPath = process.argv[4];
 } else {
     // react-native path
-    reactNativePath = dir + '/node_modules/react-native';
+    reactNativePath = dir + '/react-native';
     // react-navigation path
-    reactNavigationPath = dir + '/node_modules/react-navigation';
+    reactNavigationPath = dir + '/react-navigation';
 }
 
 if (OPT_RUN == 1) {
