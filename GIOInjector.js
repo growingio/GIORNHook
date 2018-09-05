@@ -13,6 +13,7 @@ function injectReactNative(dirPath, reset=false){
 	if(reset){
 		common.resetFile(touchableJsFilePath);
 	}else{
+		console.log(`found and modify Touchable.js: ${touchableJsFilePath}`);
 		injectOnPressScript(touchableJsFilePath);
 	}
 	var createViewJsFiles = ['Libraries/Renderer/src/renderers/native/ReactNativeFiber.js',
@@ -34,7 +35,7 @@ function injectReactNative(dirPath, reset=false){
 			if(reset){
 				common.resetFile(jsFile);
 			}else{
-			    console.log(`hook createView for: ${jsFile}`);
+			    console.log(`found and modify render.js: ${jsFile}`);
 				injectCreateViewScript(jsFile);
 			}
 		}
@@ -46,6 +47,10 @@ function injectReactNavigation(dirPath, reset=false){
 		dirPath += '/';
 	}
 	var createNavigationContainerJsFilePath = `${dirPath}src/createNavigationContainer.js`
+	if(!fs.existsSync(createNavigationContainerJsFilePath)){
+		return
+	}
+	console.log(`found and modify createNavigationContainer.js: ${createNavigationContainerJsFilePath}`);
 	if(reset){
 		common.resetFile(createNavigationContainerJsFilePath);
 	}else{
