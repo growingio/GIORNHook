@@ -143,7 +143,7 @@ function navigationEventString(){
 	var script = `if(require('react-native').Platform.OS !== 'ios') {
                     return;
 	              }
-	              if(payload && payload.state.key && payload.state.routeName && payload.state.key != payload.state.routeName) {
+	              if(payload && payload.state && payload.state.key && payload.state.routeName && payload.state.key != payload.state.routeName) {
 					var growingPageName = payload.state.routeName;
 					if(payload.state.params && payload.state.params.growingPagePath) {
 						growingPageName = payload.state.params.growingPagePath;
