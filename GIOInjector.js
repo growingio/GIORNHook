@@ -47,19 +47,27 @@ function injectReactNavigation(dirPath, reset=false){
 		dirPath += '/';
 	}
 	var createNavigationContainerJsFilePath = `${dirPath}src/createNavigationContainer.js`
+	var getChildEventSubscriberJsFilePath = `${dirPath}src/getChildEventSubscriber.js`;
 	if(!fs.existsSync(createNavigationContainerJsFilePath)){
 		return
 	}
+	if(!fs.existsSync(getChildEventSubscriberJsFilePath)){
+		return;
+	}
 	console.log(`found and modify createNavigationContainer.js: ${createNavigationContainerJsFilePath}`);
+	console.log(`found and modify createNavigationContainer.js: ${getChildEventSubscriberJsFilePath}`);
 	if(reset){
 		common.resetFile(createNavigationContainerJsFilePath);
+		common.resetFile(getChildEventSubscriberJsFilePath);
 	}else{
-		injectNavigationScript(createNavigationContainerJsFilePath);
+		injectNavigationScript(createNavigationContainerJsFilePath, getChildEventSubscriberJsFilePath);
+		
 	}
 }
 
-function injectNavigationScript(filePath){
-	common.modifyFile(filePath, onNavigationStateChangeTransformer);
+function injectNavigationScript(createNavigationContainerJsFilePath, getChildEventSubscriberJsFilePath){
+	common.modifyFile(createNavigationContainerJsFilePath, onNavigationStateChangeTransformer);
+	common.modifyFile(getChildEventSubscriberJsFilePath, onEventSubscriberTransformer);
 }
 
 /**
@@ -90,6 +98,15 @@ function onNavigationStateChangeTransformer(content){
 	return content;
 }
 
+function onEventSubscriberTransformer(content){
+	var script = "const emit = (type, payload) => {";
+	var index = content.indexOf(script);
+	if(index == -1)
+		throw "index is -1";
+	content = content.substring(0, index + script.length) + common.anonymousJsFunctionCall(navigationEventString())  + '\n' + content.substring(index + script.length);
+    return content;
+}
+
 function navigationString(currentStateVarName, actionName){
 	var script = `function $$$getActivePageName$$$(navigationState){
 	if(!navigationState)
@@ -106,20 +123,41 @@ function navigationString(currentStateVarName, actionName){
 	}
 }
 `;
-    var willFocusScript = `if (nav && nav.isTransitioning) {
-		var pageName = $$$getActivePageName$$$(${currentStateVarName});
-		require('react-native').NativeModules.GrowingIOModule.onPagePrepare(pageName);
-	}`;
+    
 	if(actionName){
-		script = `${script} ${willFocusScript} if(${actionName}.type != 'Navigation/COMPLETE_TRANSITION') {
-		return;
-    }
-`
+		script = `${script}
+		          var type = ${actionName}.type;
+                  if(type == 'Navigation/SET_PARAMS' || type == 'Navigation/COMPLETE_TRANSITION') {
+		                return;
+                  }
+                  `
 	}
 
 	script = `${script} var pageName = $$$getActivePageName$$$(${currentStateVarName});
-	require('react-native').NativeModules.GrowingIOModule.onPageShow(pageName);`;
+	if (require('react-native').Platform.OS === 'android') {
+	require('react-native').NativeModules.GrowingIOModule.onPageShow(pageName);}`;
 	return script;
+}
+
+function navigationEventString(){
+	var script = `if(require('react-native').Platform.OS !== 'ios') {
+                    return;
+	              }
+	              if(payload && payload.state.key && payload.state.routeName && payload.state.key != payload.state.routeName) {
+					var growingPageName = payload.state.routeName;
+					if(payload.state.params && payload.state.params.growingPagePath) {
+						growingPageName = payload.state.params.growingPagePath;
+					}
+					if(type == 'willFocus') {
+						require('react-native').NativeModules.GrowingIOModule.onPagePrepare(growingPageName);
+					} else if(type == 'didFocus') {
+						require('react-native').NativeModules.GrowingIOModule.onPageShow(growingPageName);
+					}
+				  }
+				  
+				  `;
+	return script;
+
 }
 
 function onPressTransformer(content){
