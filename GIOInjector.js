@@ -42,6 +42,9 @@ function injectReactNative(dirPath, reset=false){
 	});
 }
 
+/**
+ * hook react navigation
+ */
 function injectReactNavigation(dirPath, reset=false){
 	if(!dirPath.endsWith('/')){
 		dirPath += '/';
@@ -55,7 +58,7 @@ function injectReactNavigation(dirPath, reset=false){
 		return;
 	}
 	console.log(`found and modify createNavigationContainer.js: ${createNavigationContainerJsFilePath}`);
-	console.log(`found and modify createNavigationContainer.js: ${getChildEventSubscriberJsFilePath}`);
+	console.log(`found and modify getChildEventSubscriber.js: ${getChildEventSubscriberJsFilePath}`);
 	if(reset){
 		common.resetFile(createNavigationContainerJsFilePath);
 		common.resetFile(getChildEventSubscriberJsFilePath);
@@ -63,6 +66,49 @@ function injectReactNavigation(dirPath, reset=false){
 		injectNavigationScript(createNavigationContainerJsFilePath, getChildEventSubscriberJsFilePath);
 		
 	}
+}
+
+/**
+ * hook react native navigation
+ */
+function injectReactNativeNavigation(dirPath, reset=false){
+	if(!dirPath.endsWith('/')){
+		dirPath += '/';
+	}
+
+	var screenJsFilePath = `${dirPath}src/Screen.js`;
+	var androidPlatformSpecificJsFilePath = `${dirPath}src/platformSpecific.android.js`;
+	var iOSPlatformSpecificJsFilePath = `${dirPath}src/deprecated/platformSpecificDeprecated.ios.js`;
+	
+	// only judge screenJsFilePath
+	if(!fs.existsSync(screenJsFilePath)){
+		return;
+	}
+
+	if(reset){
+		common.resetFile(screenJsFilePath);
+	}else{
+        injectReactNativeNavigationScreenScript(screenJsFilePath);
+	}
+
+	var reactNativeNavigationPlatformJSFiles = [androidPlatformSpecificJsFilePath, iOSPlatformSpecificJsFilePath];
+	reactNativeNavigationPlatformJSFiles.forEach(function(jsFilePath, index){
+			if(fs.existsSync(jsFilePath)){
+               if(reset){
+                 common.resetFile(jsFilePath);
+			   }else{
+                 injectReactNativeNavigationPlatformScript(jsFilePath);
+			   }
+			}
+	});
+}
+
+function injectReactNativeNavigationScreenScript(jsFilePath){
+    common.modifyFile(jsFilePath, onReactNativeNavigationScreenTransformer);
+}
+
+function injectReactNativeNavigationPlatformScript(jsFilePath){
+    common.modifyFile(jsFilePath, onReactNativeNavigationPlatformTransformer);
 }
 
 function injectNavigationScript(createNavigationContainerJsFilePath, getChildEventSubscriberJsFilePath){
@@ -105,6 +151,68 @@ function onEventSubscriberTransformer(content){
 		throw "index is -1";
 	content = content.substring(0, index + script.length) + common.anonymousJsFunctionCall(navigationEventString())  + '\n' + content.substring(index + script.length);
     return content;
+}
+
+function onReactNativeNavigationScreenTransformer(content){
+	var script = "onNavigatorEvent(event) {";
+	var index = content.indexOf(script);
+	if(index == -1)
+		throw "index is -1";
+	content = content.substring(0, index + script.length) + common.anonymousJsFunctionCall(reactNativeNavigationScreenString()) + '\n' + content.substring(index + script.length);
+	return content;
+}
+
+function onReactNativeNavigationPlatformTransformer(content){
+	var saveScript = "function savePassProps(params) {";
+	var index = content.indexOf(saveScript);
+	if(index == -1)
+		throw "index is -1";
+	content = content.substring(0, index + saveScript.length) + common.anonymousJsFunctionCall(reactNativeNavigationPlatformString()) + '\n' + content.substring(index + saveScript.length);
+	
+	var propsScript = `const GrowingScreenProps = {};`;
+	var getPageNameFuncScript = `function getGrowingPageName(screenInstanceID) {
+		return GrowingScreenProps[screenInstanceID];
+	}`;
+	content = content.substring(0, index) + propsScript + '\n' + getPageNameFuncScript + `\n` + substring(index);
+
+	var exportIOSScript = "export default {";
+	var exportAndroidScript = "module.exports = {";
+	index = content.indexOf(exportIOSScript);
+	var exportScriptLength;
+	if(index == -1){
+		index = content.indexOf(exportAndroidScript);
+		if(index == -1){
+			throw "index is -1";
+		}
+		exportScriptLength = exportAndroidScript.length;
+	} else {
+		exportScriptLength = exportIOSScript.length;
+	}
+	content = content.substring(0, index + exportScriptLength) + `\n` + `getGrowingPageName,` + content.substring(inex + exportScriptLength);
+	
+	return content;
+}
+
+function reactNativeNavigationScreenString(){
+	var script = `var growingPageName = platformSpecific.getGrowingPageName(this.screenInstanceID);
+    if (event.id == "willAppear") {
+		require('react-native').NativeModules.GrowingIOModule.onPagePrepare(growingPageName);
+    } else if (event.id == "didAppear") {
+        require('react-native').NativeModules.GrowingIOModule.onPageShow(growingPageName);
+    }`;
+	return script;
+}
+
+function reactNativeNavigationPlatformString(){
+	var script = `if (params.navigationParams) {
+		var screenInstanceID = params.navigationParams.screenInstanceID;
+		if (params.title) {
+		  GrowingScreenProps[screenInstanceID] = params.title; 
+		} else {
+		  GrowingScreenProps[screenInstanceID] = params.screen;
+		}
+	  }`;
+	return script;
 }
 
 function navigationString(currentStateVarName, actionName){
@@ -218,5 +326,6 @@ module.exports = {
 	injectOnPressScript: injectOnPressScript,
 	injectNavigationScript: injectNavigationScript,
 	injectReactNative: injectReactNative,
-	injectReactNavigation: injectReactNavigation
+	injectReactNavigation: injectReactNavigation,
+	injectReactNativeNavigation: injectReactNativeNavigation
 }
