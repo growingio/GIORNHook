@@ -173,7 +173,7 @@ function onReactNativeNavigationPlatformTransformer(content){
 	var getPageNameFuncScript = `function getGrowingPageName(screenInstanceID) {
 		return GrowingScreenProps[screenInstanceID];
 	}`;
-	content = content.substring(0, index) + propsScript + '\n' + getPageNameFuncScript + `\n` + substring(index);
+	content = content.substring(0, index) + propsScript + '\n' + getPageNameFuncScript + `\n` + content.substring(index);
 
 	var exportIOSScript = "export default {";
 	var exportAndroidScript = "module.exports = {";
@@ -188,7 +188,7 @@ function onReactNativeNavigationPlatformTransformer(content){
 	} else {
 		exportScriptLength = exportIOSScript.length;
 	}
-	content = content.substring(0, index + exportScriptLength) + `\n` + `getGrowingPageName,` + content.substring(inex + exportScriptLength);
+	content = content.substring(0, index + exportScriptLength) + `\n` + `getGrowingPageName,` + content.substring(index + exportScriptLength);
 	
 	return content;
 }
