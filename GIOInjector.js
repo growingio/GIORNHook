@@ -206,7 +206,9 @@ function reactNativeNavigationScreenString(){
 function reactNativeNavigationPlatformString(){
 	var script = `if (params.navigationParams) {
 		var screenInstanceID = params.navigationParams.screenInstanceID;
-		if (params.title) {
+		if (params.growingPagePath) {
+		  GrowingScreenProps[screenInstanceID] = params.growingPagePath; 
+		} else if (params.title) {
 		  GrowingScreenProps[screenInstanceID] = params.title; 
 		} else {
 		  GrowingScreenProps[screenInstanceID] = params.screen;
