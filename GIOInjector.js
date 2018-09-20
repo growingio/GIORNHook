@@ -82,6 +82,7 @@ function injectReactNativeNavigation(dirPath, reset=false){
 	
 	// only judge screenJsFilePath
 	if(!fs.existsSync(screenJsFilePath)){
+		console.log(`not fond NativeNavigation: ${screenJsFilePath} , and return`);
 		return;
 	}
 
@@ -104,10 +105,12 @@ function injectReactNativeNavigation(dirPath, reset=false){
 }
 
 function injectReactNativeNavigationScreenScript(jsFilePath){
+	console.log(`find and modify Screen.js: ${jsFilePath}`);
     common.modifyFile(jsFilePath, onReactNativeNavigationScreenTransformer);
 }
 
 function injectReactNativeNavigationPlatformScript(jsFilePath){
+	console.log(`find and modify PlatformScript.js: ${jsFilePath}`);
     common.modifyFile(jsFilePath, onReactNativeNavigationPlatformTransformer);
 }
 
@@ -154,11 +157,24 @@ function onEventSubscriberTransformer(content){
 }
 
 function onReactNativeNavigationScreenTransformer(content){
+	var importScript = "const NavigationSpecific = {";
+	var importScriptIndex = content.indexOf(importScript);
+	if(importScriptIndex == -1)
+		throw "cann't find NavigationSpecific, please check your react-native-navigation version, and resport to GrowingIO"
+	var injectImportScript = "import anotherPlatformSpecific from './platformSpecific'\n";
+	content = content.substring(0, importScriptIndex) + injectImportScript + content.substring(importScriptIndex);
 	var script = "onNavigatorEvent(event) {";
 	var index = content.indexOf(script);
 	if(index == -1)
 		throw "index is -1";
 	content = content.substring(0, index + script.length) + common.anonymousJsFunctionCall(reactNativeNavigationScreenString()) + '\n' + content.substring(index + script.length);
+	var constructorEndScript = "this.navigatorEventSubscription = null;";
+	var constructorIndex = content.indexOf(constructorEndScript);
+	if (constructorIndex == -1)
+		throw "cann't find Screen.js's constructor, please check your react-native-navigation version, and report to GrowingIO";
+	var injectEndScript = "\nthis._registerNavigatorEvent();"
+	var injectPoint = constructorIndex + constructorEndScript.length;
+	content = content.substring(0, injectPoint) + injectEndScript + content.substring(injectPoint);
 	return content;
 }
 
@@ -189,12 +205,19 @@ function onReactNativeNavigationPlatformTransformer(content){
 		exportScriptLength = exportIOSScript.length;
 	}
 	content = content.substring(0, index + exportScriptLength) + `\n` + `getGrowingPageName,` + content.substring(index + exportScriptLength);
-	
 	return content;
 }
 
 function reactNativeNavigationScreenString(){
-	var script = `var growingPageName = platformSpecific.getGrowingPageName(this.screenInstanceID);
+	var script = `var growingPageName = null;
+    if(platformSpecific.getGrowingPageName){
+        growingPageName = platformSpecific.getGrowingPageName(this.screenInstanceID);
+    }else{
+        growingPageName = anotherPlatformSpecific.getGrowingPageName(this.screenInstanceID);
+    }
+    if(growingPageName == null){
+        return;
+    }
     if (event.id == "willAppear") {
 		require('react-native').NativeModules.GrowingIOModule.onPagePrepare(growingPageName);
     } else if (event.id == "didAppear") {
