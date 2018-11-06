@@ -1,6 +1,6 @@
 {
   "name": "react-native-autotrack-growingio",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "GrowingIO autotrack SDK for ReactNative",
   "main": "hook.js",
   "files": [
