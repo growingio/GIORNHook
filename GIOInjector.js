@@ -49,7 +49,7 @@ function injectReactNavigation(dirPath, reset=false){
 	if(!dirPath.endsWith('/')){
 		dirPath += '/';
 	}
-	var createNavigationContainerJsFilePath = `${dirPath}src/createNavigationContainer.js`
+	var createNavigationContainerJsFilePath = `${dirPath}src/createNavigationContainer.js`;
 	var getChildEventSubscriberJsFilePath = `${dirPath}src/getChildEventSubscriber.js`;
 	if(!fs.existsSync(createNavigationContainerJsFilePath)){
 		return
@@ -65,6 +65,26 @@ function injectReactNavigation(dirPath, reset=false){
 	}else{
 		injectNavigationScript(createNavigationContainerJsFilePath, getChildEventSubscriberJsFilePath);
 		
+	}
+}
+
+/**
+ * hook react navigation 3.x
+ * @param dirPath @react-navigation/native的地址
+ */
+function injectReactNavigation3(dirPath, reset=false) {
+	if (!dirPath.endsWith('/')) {
+		dirPath += '/';
+	}
+	const createAppContainerJsFilePath = `${dirPath}src/createAppContainer.js`;
+	if (!fs.existsSync(createAppContainerJsFilePath)) {
+		return;
+	}
+	console.log(`found and modify createAppContainer.js: ${createAppContainerJsFilePath}`);
+	if (reset) {
+		common.resetFile(createAppContainerJsFilePath);
+	} else {
+		common.modifyFile(createAppContainerJsFilePath, onNavigationStateChangeTransformer);
 	}
 }
 
@@ -352,5 +372,6 @@ module.exports = {
 	injectNavigationScript: injectNavigationScript,
 	injectReactNative: injectReactNative,
 	injectReactNavigation: injectReactNavigation,
+	injectReactNavigation3,
 	injectReactNativeNavigation: injectReactNativeNavigation
 }

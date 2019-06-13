@@ -20,6 +20,7 @@ var OPT_UNKNOWN = 0;
 var reactNativePath;
 // react-navigation path
 var reactNavigationPath;
+var reactNavigationPath3X;
 // react-native-navigation path
 var reactNativeNavigationPath;
 
@@ -118,6 +119,7 @@ if (userPackageObj && userPackageObj["GrowingIO"] && userPackageObj["GrowingIO"]
     reactNativePath = dir + '/react-native';
     // react-navigation path
     reactNavigationPath = dir + '/react-navigation';
+    reactNavigationPath3X = dir + '/@react-navigation/native';
     // react-native-navigation path
     reactNativeNavigationPath = dir + '/react-native-navigation';
 }
@@ -141,6 +143,7 @@ if (OPT_RUN == 1) {
         }
     } else {
         injector.injectReactNavigation(reactNavigationPath);
+        injector.injectReactNavigation3(reactNavigationPath3X)
         injector.injectReactNativeNavigation(reactNativeNavigationPath);
     }
     injector.injectReactNative(reactNativePath);
@@ -151,6 +154,7 @@ if (OPT_RUN == 1) {
 if (OPT_DISCARD == 1) {
     injector.injectReactNative(reactNativePath, true);
     injector.injectReactNavigation(reactNavigationPath, true);
+    injector.injectReactNavigation3(reactNavigationPath3X, true);
     injector.injectReactNativeNavigation(reactNativeNavigationPath, true);
     return;
 }
