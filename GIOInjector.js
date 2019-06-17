@@ -339,7 +339,7 @@ function navigationString3(currentStateVarName, actionName){
 								} else if (require('react-native').Platform.OS === 'ios') {
 									if((type == 'Navigation/BACK' && (${currentStateVarName} && !${currentStateVarName}.isTransitioning)) || type == 'Navigation/COMPLETE_TRANSITION') {
 										iosOnPageShow = true;
-									} else if ((type == 'Navigation/BACK' && (${currentStateVarName} && ${currentStateVarName}.isTransitioning)) || type == 'Navigation/NAVIGATE') {
+									} else if (type != 'Navigation/SET_PARAMS') {
 										iosOnPagePrepare = true;
 									}
 									if (!iosOnPagePrepare && !iosOnPageShow) {
