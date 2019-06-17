@@ -84,7 +84,7 @@ function injectReactNavigation3(dirPath, reset=false) {
 	if (reset) {
 		common.resetFile(createAppContainerJsFilePath);
 	} else {
-		common.modifyFile(createAppContainerJsFilePath, onNavigationStateChangeTransformer);
+		common.modifyFile(createAppContainerJsFilePath, onNavigationStateChangeTransformer3);
 	}
 }
 
@@ -162,6 +162,23 @@ function onNavigationStateChangeTransformer(content){
 	var clojureEnd = content.indexOf(';', forEachIndex);
 	content = content.substring(0, forEachIndex) + '{' +
 		common.anonymousJsFunctionCall(navigationString('this.state.nav', null)) + '\n' + 
+		content.substring(forEachIndex, clojureEnd + 1) +
+		'}' + content.substring(clojureEnd + 1);
+	return content;
+}
+
+function onNavigationStateChangeTransformer3(content){
+	var index = content.indexOf("if (typeof this.props.onNavigationStateChange === 'function') {");
+	if(index == -1)
+		throw "index is -1";
+	content = content.substring(0, index) + common.anonymousJsFunctionCall(navigationString3('nav', 'action'))  + '\n' + content.substring(index)
+	var didMountIndex = content.indexOf('componentDidMount() {');
+	if(didMountIndex == -1)
+		throw "didMountIndex is -1";
+	var forEachIndex = content.indexOf('this._actionEventSubscribers.forEach(subscriber =>', didMountIndex);
+	var clojureEnd = content.indexOf(';', forEachIndex);
+	content = content.substring(0, forEachIndex) + '{' +
+		common.anonymousJsFunctionCall(navigationString3('this.state.nav', null)) + '\n' + 
 		content.substring(forEachIndex, clojureEnd + 1) +
 		'}' + content.substring(clojureEnd + 1);
 	return content;
@@ -290,6 +307,61 @@ function navigationString(currentStateVarName, actionName){
 	if (require('react-native').Platform.OS === 'android') {
 	require('react-native').NativeModules.GrowingIOModule.onPageShow(pageName);}`;
 	return script;
+}
+
+function navigationString3(currentStateVarName, actionName){
+	var script = `function $$$getActivePageName$$$(navigationState){
+		if(!navigationState)
+			return null;
+		const route = navigationState.routes[navigationState.index];
+		if(route.routes){
+			return $$$getActivePageName$$$(route);
+		}else{
+			if(route.params && route.params["growingPagePath"]) {
+				return route.params["growingPagePath"] 
+			} else {
+				return route.routeName;
+			}
+		}
+	}
+	`;
+			
+		if(actionName){
+			script = `${script}
+								var type = ${actionName}.type;
+								var iosOnPagePrepare = false;
+								var iosOnPageShow = false;
+	
+								if (require('react-native').Platform.OS === 'android') {
+									if(type == 'Navigation/SET_PARAMS' || type == 'Navigation/COMPLETE_TRANSITION') {
+										return;
+									}
+								} else if (require('react-native').Platform.OS === 'ios') {
+									if((type == 'Navigation/BACK' && (${currentStateVarName} && !${currentStateVarName}.isTransitioning)) || type == 'Navigation/COMPLETE_TRANSITION') {
+										iosOnPageShow = true;
+									} else if ((type == 'Navigation/BACK' && (${currentStateVarName} && ${currentStateVarName}.isTransitioning)) || type == 'Navigation/NAVIGATE') {
+										iosOnPagePrepare = true;
+									}
+									if (!iosOnPagePrepare && !iosOnPageShow) {
+										return;
+									}
+								}
+	
+										
+										`
+		}
+	
+		script = `${script} var pageName = $$$getActivePageName$$$(${currentStateVarName});
+		if (require('react-native').Platform.OS === 'android') {
+		require('react-native').NativeModules.GrowingIOModule.onPageShow(pageName);
+		} else if (require('react-native').Platform.OS === 'ios') {
+			if (!${actionName} || iosOnPageShow) {
+				require('react-native').NativeModules.GrowingIOModule.onPageShow(pageName);
+			} else if (iosOnPagePrepare) {
+				require('react-native').NativeModules.GrowingIOModule.onPagePrepare(pageName);
+			}
+		}`;
+		return script;
 }
 
 function navigationEventString(){
