@@ -171,14 +171,14 @@ function onNavigationStateChangeTransformer3(content){
 	var index = content.indexOf("if (typeof this.props.onNavigationStateChange === 'function') {");
 	if(index == -1)
 		throw "index is -1";
-	content = content.substring(0, index) + common.anonymousJsFunctionCall(navigationString3('nav', 'action'))  + '\n' + content.substring(index)
+	content = content.substring(0, index) + common.anonymousJsFunctionCall(navigationString3('prevNav', 'nav', 'action'))  + '\n' + content.substring(index)
 	var didMountIndex = content.indexOf('componentDidMount() {');
 	if(didMountIndex == -1)
 		throw "didMountIndex is -1";
 	var forEachIndex = content.indexOf('this._actionEventSubscribers.forEach(subscriber =>', didMountIndex);
 	var clojureEnd = content.indexOf(';', forEachIndex);
 	content = content.substring(0, forEachIndex) + '{' +
-		common.anonymousJsFunctionCall(navigationString3('this.state.nav', null)) + '\n' + 
+		common.anonymousJsFunctionCall(navigationString3(null, 'this.state.nav', null)) + '\n' +
 		content.substring(forEachIndex, clojureEnd + 1) +
 		'}' + content.substring(clojureEnd + 1);
 	return content;
@@ -309,7 +309,7 @@ function navigationString(currentStateVarName, actionName){
 	return script;
 }
 
-function navigationString3(currentStateVarName, actionName){
+function navigationString3(prevStateVarName, currentStateVarName, actionName){
 	var script = `function $$$getActivePageName$$$(navigationState){
 		if(!navigationState)
 			return null;
@@ -353,7 +353,13 @@ function navigationString3(currentStateVarName, actionName){
 	
 		script = `${script} var pageName = $$$getActivePageName$$$(${currentStateVarName});
 		if (require('react-native').Platform.OS === 'android') {
-		require('react-native').NativeModules.GrowingIOModule.onPageShow(pageName);
+		    if (${prevStateVarName}){
+		        var prevPageName = $$$getActivePageName$$$(${prevStateVarName});
+		        if (pageName == prevPageName){
+  		            return;
+		        }
+     		}
+		    require('react-native').NativeModules.GrowingIOModule.onPageShow(pageName);
 		} else if (require('react-native').Platform.OS === 'ios') {
 			if (!${actionName} || iosOnPageShow) {
 				require('react-native').NativeModules.GrowingIOModule.onPageShow(pageName);
