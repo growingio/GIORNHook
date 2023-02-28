@@ -1,12 +1,12 @@
 {
   "name": "react-native-autotrack-growingio",
-  "version": "0.0.7",
+  "version": "0.0.8-beta.0",
   "description": "GrowingIO autotrack SDK for ReactNative",
   "main": "hook.js",
   "files": [
-      "GIOCommon.js",
-	  "GIOInjector.js",
-	  "hook.js"
+    "GIOCommon.js",
+    "GIOInjector.js",
+    "hook.js"
   ],
   "repository": {
     "url": "https://github.com/growingio/GIORNHook.git",
@@ -18,7 +18,7 @@
     "IOS",
     "ReactNative",
     "GrowingIO",
-	"autotrack",
+    "autotrack",
     "SDK"
   ],
   "homepage": "https://www.growingio.com/",
