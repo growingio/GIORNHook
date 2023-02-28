@@ -189,7 +189,7 @@ if (OPT_DISCARD == 1) {
   ) {
     var path = userPackageObj["GrowingIO"]["path"];
     if (path["react-navigation-3x"]) {
-      injector.injectReactNavigation4(
+      injector.injectReactNavigation3(
         `${dir}/${path["react-navigation-3x"]}`,
         true
       );
