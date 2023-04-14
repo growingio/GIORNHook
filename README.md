@@ -11,7 +11,7 @@
 npm install --save react-native-autotrack-growingio
 	
 # 直接使用git
-npm install --save https://github.com/growingio/GIORNHook.git#0.0.4
+npm install --save https://github.com/growingio/GIORNHook.git#0.0.8
 ```
 
 调用方式(手动调用):
