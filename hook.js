@@ -148,9 +148,29 @@ if (OPT_RUN == 1) {
     } else {
       injector.injectReactNativeNavigation(reactNativeNavigationPath);
     }
+  } else if (
+    userPackageObj &&
+    userPackageObj["GrowingIO"] &&
+    userPackageObj["GrowingIO"]["path"]
+  ) {
+    var path = userPackageObj["GrowingIO"]["path"];
+    if (path["react-navigation-3x"]) {
+      injector.injectReactNavigation3(`${dir}/${path["react-navigation-3x"]}`);
+    }
+    if (path["react-navigation-4x"]) {
+      injector.injectReactNavigation4(`${dir}/${path["react-navigation-4x"]}`);
+    }
+    // 5x、6x 均使用官方建议page采集点
+    if (path["react-navigation-5x"]) {
+      injector.injectReactNavigation6(`${dir}/${path["react-navigation-5x"]}`);
+    }
+    if (path["react-navigation-6x"]) {
+      injector.injectReactNavigation6(`${dir}/${path["react-navigation-6x"]}`);
+    }
   } else {
     injector.injectReactNavigation(reactNavigationPath);
     injector.injectReactNavigation3(reactNavigationPath3X);
+    injector.injectReactNavigation4(reactNavigationPath3X);
     injector.injectReactNavigation6(reactNavigationPath6X);
     injector.injectReactNativeNavigation(reactNativeNavigationPath);
   }
@@ -161,9 +181,44 @@ if (OPT_RUN == 1) {
 
 if (OPT_DISCARD == 1) {
   injector.injectReactNative(reactNativePath, true);
-  injector.injectReactNavigation(reactNavigationPath, true);
-  injector.injectReactNavigation3(reactNavigationPath3X, true);
-  injector.injectReactNavigation6(reactNavigationPath6X, true);
-  injector.injectReactNativeNavigation(reactNativeNavigationPath, true);
+
+  if (
+    userPackageObj &&
+    userPackageObj["GrowingIO"] &&
+    userPackageObj["GrowingIO"]["path"]
+  ) {
+    var path = userPackageObj["GrowingIO"]["path"];
+    if (path["react-navigation-3x"]) {
+      injector.injectReactNavigation3(
+        `${dir}/${path["react-navigation-3x"]}`,
+        true
+      );
+    }
+    if (path["react-navigation-4x"]) {
+      injector.injectReactNavigation4(
+        `${dir}/${path["react-navigation-4x"]}`,
+        true
+      );
+    }
+    // 5x、6x 均使用官方建议page采集点
+    if (path["react-navigation-5x"]) {
+      injector.injectReactNavigation6(
+        `${dir}/${path["react-navigation-5x"]}`,
+        true
+      );
+    }
+    if (path["react-navigation-6x"]) {
+      injector.injectReactNavigation6(
+        `${dir}/${path["react-navigation-6x"]}`,
+        true
+      );
+    }
+  } else {
+    injector.injectReactNavigation(reactNavigationPath, true);
+    injector.injectReactNavigation3(reactNavigationPath3X, true);
+    injector.injectReactNavigation4(reactNavigationPath3X, true);
+    injector.injectReactNavigation6(reactNavigationPath6X, true);
+    injector.injectReactNativeNavigation(reactNativeNavigationPath, true);
+  }
   return;
 }

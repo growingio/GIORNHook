@@ -99,15 +99,27 @@ function injectReactNavigation(dirPath, reset = false) {
   }
 }
 
+function injectReactNavigation3(dirPath, reset = false) {
+  injectReactNavigationFrom3To4(dirPath, "src/createAppContainer.js", reset);
+}
+
+function injectReactNavigation4(dirPath, reset = false) {
+  injectReactNavigationFrom3To4(
+    dirPath,
+    "lib/module/createAppContainer.js",
+    reset
+  );
+}
+
 /**
  * hook react navigation 3.x
  * @param dirPath @react-navigation/native的地址
  */
-function injectReactNavigation3(dirPath, reset = false) {
+function injectReactNavigationFrom3To4(dirPath, filePath, reset = false) {
   if (!dirPath.endsWith("/")) {
     dirPath += "/";
   }
-  const createAppContainerJsFilePath = `${dirPath}src/createAppContainer.js`;
+  var createAppContainerJsFilePath = `${dirPath}${filePath}`;
   if (!fs.existsSync(createAppContainerJsFilePath)) {
     return;
   }
@@ -485,7 +497,9 @@ function navigationString3(prevStateVarName, currentStateVarName, actionName) {
 										return;
 									}
 								} else if (require('react-native').Platform.OS === 'ios') {
-									if((type == 'Navigation/BACK' && (${currentStateVarName} && !${currentStateVarName}.isTransitioning)) || type == 'Navigation/COMPLETE_TRANSITION') {
+									if((type == 'Navigation/BACK' && (${currentStateVarName} && !${currentStateVarName}.isTransitioning)) 
+									|| type == 'Navigation/COMPLETE_TRANSITION'
+									|| type == 'Navigation/JUMP_TO') {
 										iosOnPageShow = true;
 									} else if (type != 'Navigation/SET_PARAMS') {
 										iosOnPagePrepare = true;
@@ -664,6 +678,7 @@ module.exports = {
   injectReactNative: injectReactNative,
   injectReactNavigation: injectReactNavigation,
   injectReactNavigation3,
+  injectReactNavigation4,
   injectReactNavigation6,
   injectReactNativeNavigation: injectReactNativeNavigation,
 };
