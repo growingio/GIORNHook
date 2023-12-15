@@ -312,7 +312,7 @@ function onNavigationStateChangeTransformer6(content) {
   if (index == -1) throw "index is -1";
   content =
     content.substring(0, index) +
-    common.anonymousJsFunctionCall(navigationString6("hydratedState")) +
+    common.anonymousJsFunctionCall(navigationString6("getRootState()")) +
     "\n" +
     content.substring(index);
   return content;
