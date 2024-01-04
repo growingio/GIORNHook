@@ -604,7 +604,13 @@ function newOnPressTransformer(content) {
   if (index == -1) throw "Can't not hook onPress function";
   var injectScript =
     "var ReactNative = require('react-native');\n" +
-    "ReactNative.NativeModules.GrowingIOModule.onClick(event.target._nativeTag);";
+    "var growingTag = event.target && event.target._nativeTag;\n" +
+    "if(!growingTag) {\n" +
+    "  growingTag = event.nativeEvent && event.nativeEvent.target;\n" +
+    "}\n" +
+    "if(typeof growingTag === 'number') {\n" +
+    "  ReactNative.NativeModules.GrowingIOModule.onClick(growingTag);\n" +
+    "}\n";
   injectScript = common.anonymousJsFunctionCall(injectScript);
   var result = `${content.substring(
     0,
