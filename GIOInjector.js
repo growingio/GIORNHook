@@ -535,13 +535,14 @@ function navigationString3(prevStateVarName, currentStateVarName, actionName) {
 /**
  * 6.x版本该变量名无变化，可以直接使用
  * 采用拼接构造路径，参考checkDuplicateRouteNames
+ * 历史遗留问题 p/pg 路径问题
  */
 function navigationString6(hydratedState) {
   var raw = "${path}/${route.name}";
   var script = `function $$$getActivePageName$$$(state){
 		if(!state)
 			return null;
-		let path = 'Root';
+		let path = '/Root';
 		let route = state.routes[state.index];
 		while(route.state) {
 			path = \`${raw}\`;
